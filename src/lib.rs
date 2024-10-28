@@ -111,3 +111,153 @@ pub fn load_data(data: Vec<Vec<String>>) -> Result<(), Box<dyn Error>> {
     )?;
     Ok(())
 }
+
+use rusqlite::{params, Connection, Result};
+use std::error::Error;
+use std::fs::OpenOptions;
+use std::io::Write;
+
+/// Logs SQL queries to the `queryLog.md` file.
+pub fn log_query(query: &str) -> Result<(), Box<dyn Error>> {
+    let mut file = OpenOptions::new().append(true).create(true).open("queryLog.md")?;
+    writeln!(file, "```sql\n{}\n```\n", query)?;
+    Ok(())
+}
+
+/// Retrieves and displays the top `n` records from the `worker_health` table.
+pub fn query_data(n: u32) -> Result<(), Box<dyn Error>> {
+    let conn = Connection::open("database1.db")?;
+    let mut stmt = conn.prepare("SELECT * FROM worker_health LIMIT ?1")?;
+    let rows = stmt.query_map([n], |row| {
+        Ok((
+            row.get::<_, i32>(0)?,
+            row.get::<_, i32>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+            row.get::<_, i32>(4)?,
+            row.get::<_, String>(5)?,
+            row.get::<_, i32>(6)?,
+            row.get::<_, String>(7)?,
+            row.get::<_, bool>(8)?,
+        ))
+    })?;
+    
+    println!("Top {} rows of worker_health table:", n);
+    for row in rows {
+        println!("{:?}", row?);
+    }
+    
+    log_query(&format!("SELECT * FROM worker_health LIMIT {};", n))?;
+    Ok(())
+}
+
+/// Queries a specific record based on `employee_id`.
+pub fn query_specific_record(employee_id: i32) -> Result<(), Box<dyn Error>> {
+    let conn = Connection::open("database1.db")?;
+    let mut stmt = conn.prepare("SELECT * FROM worker_health WHERE Employee_ID = ?1")?;
+    let mut rows = stmt.query([employee_id])?;
+    
+    if let Some(row) = rows.next()? {
+        println!(
+            "Record with Employee_ID {}:\n{:?}",
+            employee_id,
+            (
+                row.get::<_, i32>(0)?,
+                row.get::<_, i32>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, i32>(4)?,
+                row.get::<_, String>(5)?,
+                row.get::<_, i32>(6)?,
+                row.get::<_, String>(7)?,
+                row.get::<_, bool>(8)?
+            )
+        );
+    } else {
+        println!("No record found for Employee_ID {}", employee_id);
+    }
+    
+    log_query(&format!("SELECT * FROM worker_health WHERE Employee_ID = {};", employee_id))?;
+    Ok(())
+}
+
+/// Creates a new record in `worker_health` if the `Employee_ID` does not already exist.
+pub fn create_record(
+    id: i32,
+    age: i32,
+    jobrole: &str,
+    industry: &str,
+    experience: i32,
+    worklocation: &str,
+    hoursworked: i32,
+    mhcondition: &str,
+    access: bool,
+) -> Result<(), Box<dyn Error>> {
+    let conn = Connection::open("database1.db")?;
+    
+    let exists: bool = conn.query_row(
+        "SELECT EXISTS(SELECT 1 FROM worker_health WHERE Employee_ID = ?1)",
+        [id],
+        |row| row.get(0),
+    )?;
+    
+    if exists {
+        println!("Cannot create record; Employee_ID {} already exists.", id);
+        return Ok(());
+    }
+    
+    conn.execute(
+        "INSERT INTO worker_health (Employee_ID, Age, Job_Role, Industry, Years_of_Experience, Work_Location, Hours_Worked_Per_Week, Mental_Health_Condition, Access_to_Mental_Health_Resources) 
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+        params![id, age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access],
+    )?;
+    
+    log_query(&format!(
+        "INSERT INTO worker_health VALUES ({}, {}, '{}', '{}', {}, '{}', {}, '{}', {});",
+        id, age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access
+    ))?;
+    println!("Record with Employee_ID {} created successfully.", id);
+    query_specific_record(id)?;
+    Ok(())
+}
+
+/// Updates an existing record in `worker_health`.
+pub fn update_record(
+    id: i32,
+    age: i32,
+    jobrole: &str,
+    industry: &str,
+    experience: i32,
+    worklocation: &str,
+    hoursworked: i32,
+    mhcondition: &str,
+    access: bool,
+) -> Result<(), Box<dyn Error>> {
+    let conn = Connection::open("database1.db")?;
+    conn.execute(
+        "UPDATE worker_health SET Age = ?1, Job_Role = ?2, Industry = ?3, Years_of_Experience = ?4, 
+         Work_Location = ?5, Hours_Worked_Per_Week = ?6, Mental_Health_Condition = ?7, Access_to_Mental_Health_Resources = ?8 
+         WHERE Employee_ID = ?9",
+        params![age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access, id],
+    )?;
+    
+    log_query(&format!(
+        "UPDATE worker_health SET Age = {}, Job_Role = '{}', Industry = '{}', Years_of_Experience = {}, 
+         Work_Location = '{}', Hours_Worked_Per_Week = {}, Mental_Health_Condition = '{}', Access_to_Mental_Health_Resources = {} 
+         WHERE Employee_ID = {};",
+        age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access, id
+    ))?;
+    println!("Record with Employee_ID {} updated successfully.", id);
+    query_specific_record(id)?;
+    Ok(())
+}
+
+/// Deletes a record based on `employee_id`.
+pub fn delete_record(employee_id: i32) -> Result<(), Box<dyn Error>> {
+    let conn = Connection::open("database1.db")?;
+    conn.execute("DELETE FROM worker_health WHERE Employee_ID = ?1", [employee_id])?;
+    
+    log_query(&format!("DELETE FROM worker_health WHERE Employee_ID = {};", employee_id))?;
+    println!("Record with Employee_ID {} deleted successfully.", employee_id);
+    Ok(())
+}
