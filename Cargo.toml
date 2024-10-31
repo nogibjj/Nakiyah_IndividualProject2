@@ -7,3 +7,4 @@ edition = "2021"
 reqwest = { version = "0.11", features = ["blocking"] }
 csv = "1.1"
 rusqlite = { version = "0.26", features = ["bundled"] }
+tempfile = "3.5"  # or the latest version

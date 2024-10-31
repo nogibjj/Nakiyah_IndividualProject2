@@ -608,6 +608,7 @@ dependencies = [
  "csv",
  "reqwest",
  "rusqlite",
+ "tempfile",
 ]
 
 [[package]]
