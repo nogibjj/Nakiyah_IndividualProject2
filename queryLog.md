@@ -1222,3 +1222,52 @@ UPDATE worker_health SET
 DELETE FROM worker_health WHERE Employee_ID = 101;
 ```
 
+```sql
+SELECT * FROM worker_health LIMIT 20;
+```
+
+```sql
+INSERT INTO worker_health VALUES (201, 30, 'Tester', 'Tech', 5, 'Remote', 40, 'None', true);
+```
+
+```sql
+SELECT * FROM worker_health WHERE Employee_ID = 201;
+```
+
+```sql
+SELECT * FROM worker_health WHERE Employee_ID = 201;
+```
+
+```sql
+SELECT * FROM worker_health WHERE Employee_ID = 201;
+```
+
+```sql
+SELECT * FROM worker_health WHERE Employee_ID = 201;
+```
+
+```sql
+SELECT * FROM worker_health LIMIT 20;
+```
+
+```sql
+DELETE FROM worker_health WHERE Employee_ID = 201;
+```
+
+```sql
+UPDATE worker_health SET 
+         Age = 32, Job_Role = 'Senior Tester', Industry = 'Tech', 
+         Years_of_Experience = 6, Work_Location = 'On-site', 
+         Hours_Worked_Per_Week = 42, Mental_Health_Condition = 'None', 
+         Access_to_Mental_Health_Resources = false 
+         WHERE Employee_ID = 201;
+```
+
+```sql
+SELECT * FROM worker_health WHERE Employee_ID = 201;
+```
+
+```sql
+SELECT * FROM worker_health WHERE Employee_ID = 201;
+```
+
