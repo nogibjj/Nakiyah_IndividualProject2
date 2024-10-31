@@ -3,6 +3,7 @@
 [![Rust CI/CD Pipeline](https://github.com/nogibjj/Nakiyah_IndividualProject2/actions/workflows/rust.yml/badge.svg)](https://github.com/nogibjj/Nakiyah_IndividualProject2/actions/workflows/rust.yml)
 
 ## Project Overview
+```
 Nakiyah_Assignment5/
 ├── .devcontainer/
 │   ├── devcontainer.json
@@ -23,9 +24,13 @@ Nakiyah_Assignment5/
 ├── Cargo.toml
 ├── database1.db
 └── queryLog.md
+```
 
 ## Purpose of this project
-This project aims to analyze the impact of remote work on mental health through the data extraction, transformation, and loading (ETL) pipeline. This project is designed with Rust to leverage its performance and safety features. It processes data from an external public dataset and stores it in a SQLite database. The key stages of the pipeline are as follows:
+This project aims to analyze the impact of remote work on mental health through the data extraction, transformation, and loading (ETL) pipeline. This project is designed with Rust to leverage its performance and safety features. 
+I used GitHub Copilot to convert my Python code into Rust, using its suggestions as a base. I adjusted the code to improve accuracy and error handling, making the ETL pipeline more reliable for analyzing remote work’s impact on mental health.
+
+Overall, this project repository processes data from an external public dataset and stores it in a SQLite database. The key stages of the pipeline are as follows:
 
 1. Extract: Data is fetched from a public GitHub repository and loaded into a local CSV file.
 
@@ -81,9 +86,3 @@ To run the tests, use:
 ```bash
 cargo test
 ```
-
-
-
-## Conclusion
-
-This ETL pipeline is designed to efficiently handle data extraction, transformation, and loading into a SQLite database, allowing for easy querying and management of employee mental health data. 
