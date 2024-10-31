@@ -1,10 +1,10 @@
-use reqwest::blocking::get;
-use std::fs::File;
-use std::io::Write;
-use std::error::Error;
 use csv::ReaderBuilder;
+use reqwest::blocking::get;
 use rusqlite::{params, Connection};
+use std::error::Error;
+use std::fs::File;
 use std::fs::OpenOptions;
+use std::io::Write;
 
 /// Downloads data from a specified URL and saves it to a local file.
 pub fn extract_data(url: &str, file_path: &str) -> Result<String, Box<dyn Error>> {
@@ -15,7 +15,11 @@ pub fn extract_data(url: &str, file_path: &str) -> Result<String, Box<dyn Error>
         file.write_all(&response.bytes()?)?;
         Ok(file_path.to_string())
     } else {
-        Err(format!("Failed to download file. Status code: {}", response.status()).into())
+        Err(format!(
+            "Failed to download file. Status code: {}",
+            response.status()
+        )
+        .into())
     }
 }
 
@@ -31,7 +35,9 @@ pub fn log_query(query: &str) -> Result<(), Box<dyn Error>> {
 
 /// Cleans and prepares data from a CSV file by converting specific columns to appropriate data types.
 pub fn clean_data(file_path: &str) -> Result<Vec<Vec<String>>, Box<dyn Error>> {
-    let mut reader = ReaderBuilder::new().has_headers(true).from_path(file_path)?;
+    let mut reader = ReaderBuilder::new()
+        .has_headers(true)
+        .from_path(file_path)?;
     let mut cleaned_data = Vec::new();
 
     for result in reader.records() {
@@ -89,13 +95,15 @@ pub fn load_data(data: Vec<Vec<String>>) -> Result<(), Box<dyn Error>> {
 
     let insert_query = "INSERT INTO worker_health VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     for record in data {
-        conn.execute(insert_query, params![
-            record[0], record[1], record[2], record[3],
-            record[4], record[5], record[6], record[7],
-            record[8],
-        ])?;
+        conn.execute(
+            insert_query,
+            params![
+                record[0], record[1], record[2], record[3], record[4], record[5], record[6],
+                record[7], record[8],
+            ],
+        )?;
     }
-    
+
     log_query(
         "CREATE TABLE worker_health (
             Employee_ID INTEGER PRIMARY KEY,
@@ -107,7 +115,7 @@ pub fn load_data(data: Vec<Vec<String>>) -> Result<(), Box<dyn Error>> {
             Hours_Worked_Per_Week INTEGER,
             Mental_Health_Condition TEXT,
             Access_to_Mental_Health_Resources BOOLEAN
-        );"
+        );",
     )?;
     Ok(())
 }
@@ -129,12 +137,12 @@ pub fn query_data(n: u32) -> Result<(), Box<dyn Error>> {
             row.get::<_, bool>(8)?,
         ))
     })?;
-    
+
     println!("Top {} rows of worker_health table:", n);
     for row in rows {
         println!("{:?}", row?);
     }
-    
+
     log_query(&format!("SELECT * FROM worker_health LIMIT {};", n))?;
     Ok(())
 }
@@ -144,7 +152,7 @@ pub fn query_specific_record(employee_id: i32) -> Result<(), Box<dyn Error>> {
     let conn = Connection::open("database1.db")?;
     let mut stmt = conn.prepare("SELECT * FROM worker_health WHERE Employee_ID = ?1")?;
     let mut rows = stmt.query([employee_id])?;
-    
+
     if let Some(row) = rows.next()? {
         println!(
             "Record with Employee_ID {}:\n{:?}",
@@ -164,8 +172,11 @@ pub fn query_specific_record(employee_id: i32) -> Result<(), Box<dyn Error>> {
     } else {
         println!("No record found for Employee_ID {}", employee_id);
     }
-    
-    log_query(&format!("SELECT * FROM worker_health WHERE Employee_ID = {};", employee_id))?;
+
+    log_query(&format!(
+        "SELECT * FROM worker_health WHERE Employee_ID = {};",
+        employee_id
+    ))?;
     Ok(())
 }
 
@@ -183,37 +194,37 @@ pub fn create_record(
 ) -> Result<(), Box<dyn Error>> {
     // Open a connection to the SQLite database.
     let conn = Connection::open("database1.db")?;
-    
+
     // Check if the record with the given Employee_ID already exists.
     let exists: bool = conn.query_row(
         "SELECT EXISTS(SELECT 1 FROM worker_health WHERE Employee_ID = ?1)",
         [id],
         |row| row.get(0),
     )?;
-    
+
     // If the record exists, print a message and exit the function.
     if exists {
         println!("Cannot create record; Employee_ID {} already exists.", id);
         return Ok(());
     }
-    
+
     // Insert the new record into the worker_health table.
     conn.execute(
         "INSERT INTO worker_health (Employee_ID, Age, Job_Role, Industry, Years_of_Experience, Work_Location, Hours_Worked_Per_Week, Mental_Health_Condition, Access_to_Mental_Health_Resources) 
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
         params![id, age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access],
     )?;
-    
+
     // Log the SQL query for record creation.
     log_query(&format!(
         "INSERT INTO worker_health VALUES ({}, {}, '{}', '{}', {}, '{}', {}, '{}', {});",
         id, age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access
     ))?;
-    
+
     // Print a success message and query the specific record to show its details.
     println!("Record with Employee_ID {} created successfully.", id);
     query_specific_record(id)?;
-    
+
     Ok(())
 }
 
@@ -230,20 +241,20 @@ pub fn update_record(
     access: bool,
 ) -> Result<(), Box<dyn Error>> {
     let conn = Connection::open("database1.db")?;
-    
+
     // Check if the record with the given Employee_ID exists.
     let exists: bool = conn.query_row(
         "SELECT EXISTS(SELECT 1 FROM worker_health WHERE Employee_ID = ?1)",
         [id],
         |row| row.get(0),
     )?;
-    
+
     // If the record does not exist, print a message and exit the function.
     if !exists {
         println!("Cannot update record; Employee_ID {} does not exist.", id);
         return Ok(());
     }
-    
+
     // Update the existing record in the worker_health table.
     conn.execute(
         "UPDATE worker_health SET 
@@ -252,9 +263,19 @@ pub fn update_record(
          Hours_Worked_Per_Week = ?7, Mental_Health_Condition = ?8, 
          Access_to_Mental_Health_Resources = ?9 
          WHERE Employee_ID = ?1",
-        params![id, age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access],
+        params![
+            id,
+            age,
+            jobrole,
+            industry,
+            experience,
+            worklocation,
+            hoursworked,
+            mhcondition,
+            access
+        ],
     )?;
-    
+
     // Log the SQL query for record update.
     log_query(&format!(
         "UPDATE worker_health SET 
@@ -265,7 +286,7 @@ pub fn update_record(
          WHERE Employee_ID = {};",
         age, jobrole, industry, experience, worklocation, hoursworked, mhcondition, access, id
     ))?;
-    
+
     // Print a success message.
     println!("Record with Employee_ID {} updated successfully.", id);
     Ok(())
@@ -274,27 +295,39 @@ pub fn update_record(
 /// Deletes a record in `worker_health` based on `Employee_ID`.
 pub fn delete_record(employee_id: i32) -> Result<(), Box<dyn Error>> {
     let conn = Connection::open("database1.db")?;
-    
+
     // Check if the record with the given Employee_ID exists.
     let exists: bool = conn.query_row(
         "SELECT EXISTS(SELECT 1 FROM worker_health WHERE Employee_ID = ?1)",
         [employee_id],
         |row| row.get(0),
     )?;
-    
+
     // If the record does not exist, print a message and exit the function.
     if !exists {
-        println!("Cannot delete record; Employee_ID {} does not exist.", employee_id);
+        println!(
+            "Cannot delete record; Employee_ID {} does not exist.",
+            employee_id
+        );
         return Ok(());
     }
-    
+
     // Delete the record from the worker_health table.
-    conn.execute("DELETE FROM worker_health WHERE Employee_ID = ?1", [employee_id])?;
-    
+    conn.execute(
+        "DELETE FROM worker_health WHERE Employee_ID = ?1",
+        [employee_id],
+    )?;
+
     // Log the SQL query for record deletion.
-    log_query(&format!("DELETE FROM worker_health WHERE Employee_ID = {};", employee_id))?;
-    
+    log_query(&format!(
+        "DELETE FROM worker_health WHERE Employee_ID = {};",
+        employee_id
+    ))?;
+
     // Print a success message.
-    println!("Record with Employee_ID {} deleted successfully.", employee_id);
+    println!(
+        "Record with Employee_ID {} deleted successfully.",
+        employee_id
+    );
     Ok(())
 }

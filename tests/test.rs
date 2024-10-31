@@ -1,5 +1,5 @@
 // src/tests.rs
-use project2::{create_record, query_specific_record, update_record, delete_record, query_data};
+use project2::{create_record, delete_record, query_data, query_specific_record, update_record};
 
 #[test]
 fn test_create_record() {
