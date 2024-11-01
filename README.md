@@ -27,10 +27,9 @@ Nakiyah_Assignment5/
 ```
 
 ## Purpose of this project
-This project aims to analyze the impact of remote work on mental health through the data extraction, transformation, and loading (ETL) pipeline. This project is designed with Rust to leverage its performance and safety features. 
-I used GitHub Copilot to convert my Python code into Rust, using its suggestions as a base. I adjusted the code to improve accuracy and error handling, making the ETL pipeline more reliable for analyzing remote work’s impact on mental health.
-
-Overall, this project repository processes data from an external public dataset and stores it in a SQLite database. The key stages of the pipeline are as follows:
+This project provides functions for ETL (Extract, Transform, Load) operations and querying a SQLite database to enable efficient data analysis. 
+This repository processes data from an external public dataset and stores it in a SQLite database using Rust 
+(to leverage its performance and safety features). Overall, The key stages of the pipeline are as follows:
 
 1. Extract: Data is fetched from a public GitHub repository and loaded into a local CSV file.
 
@@ -38,6 +37,10 @@ Overall, this project repository processes data from an external public dataset 
 The cleaned data is then loaded into a SQLite `.db` file, where it can be efficiently queried for further analysis.
 
 3. Querying: SQL queries are verified to ensure they return the expected results, such as retrieving the top 20 rows from a specific table.
+
+I used the help of GitHub Copilot to convert my existing Python code into Rust. Using Co-pilot's suggestions as a base, 
+I adjusted the code to improve accuracy and error handling, making the ETL pipeline more reliable for analyzing remote work’s 
+impact on mental health.
 
 ## Rust Files Overview
 
@@ -70,9 +73,9 @@ The cleaned data is then loaded into a SQLite `.db` file, where it can be effici
 
 ## Preparation and Dependency Installation:
 **Build the Project**:
-   ```bash
-   cargo build
-   ```
+```bash
+cargo build
+```
 
 ## Usage
 To run the project, you can use the following command:
