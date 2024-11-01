@@ -2,6 +2,9 @@
 
 [![Rust CI/CD Pipeline](https://github.com/nogibjj/Nakiyah_IndividualProject2/actions/workflows/rust.yml/badge.svg)](https://github.com/nogibjj/Nakiyah_IndividualProject2/actions/workflows/rust.yml)
 
+## Youtube Video
+https://youtu.be/Vh0ol19et-o
+
 ## Project Overview
 ```
 Nakiyah_Assignment5/
@@ -16,7 +19,7 @@ Nakiyah_Assignment5/
 ├── mylib/
 │   ├── lib.rs
 │   └── main.rs
-├── mylib/
+├── tests/
 │   └── test.rs
 ├── Makefile
 ├── README.md
